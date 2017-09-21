@@ -52,7 +52,7 @@ namespace depth_clustering {
 //
 //      if (boost::filesystem::create_directory(dir)) {
 
-        const std::string& segment_dir = "segment_files";
+        const std::string& segment_dir = "depth_cluster_segments";
 
         boost::filesystem::create_directory(segment_dir);
 

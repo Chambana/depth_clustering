@@ -15,6 +15,9 @@
 
 #include <ros/ros.h>
 
+#include <qapplication.h>
+
+
 #include <string>
 
 #include "ros_bridge/cloud_odom_ros_subscriber.h"
@@ -25,12 +28,18 @@
 #include "projections/spherical_projection.h"
 #include "utils/radians.h"
 #include "visualization/cloud_saver.h"
+#include "visualization/visualizer.h"
 
 #include "tclap/CmdLine.h"
+
+
 
 using std::string;
 
 using namespace depth_clustering;
+
+using ClustererT = ImageBasedClusterer<LinearImageLabeler<>>;
+
 
 int main(int argc, char* argv[]) {
   TCLAP::CmdLine cmd(
@@ -69,6 +78,9 @@ int main(int argc, char* argv[]) {
     exit(1);
   }
 
+  QApplication application(argc, argv);
+
+
   ros::init(argc, argv, "dynamics_processing");
   ros::NodeHandle nh;
 
@@ -76,13 +88,16 @@ int main(int argc, char* argv[]) {
 
   CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, topic_clouds);
 
+    Visualizer visualizer;
+    visualizer.show();
+
 //  int min_cluster_size = 20;
 //  int max_cluster_size = 100000;
     int min_cluster_size = 100;
     int max_cluster_size = 5000;
 
-  int smooth_window_size = 5;
-  Radians ground_remove_angle = 5_deg;
+  int smooth_window_size = 7;
+  Radians ground_remove_angle = 7_deg;
 
 //  VectorCloudSaver cloud_saver("clusters", 10);
     VectorCloudSaver cloud_saver("clusters", 1);
@@ -92,19 +107,28 @@ int main(int argc, char* argv[]) {
   auto depth_ground_remover = DepthGroundRemover(
       *proj_params_ptr, ground_remove_angle, smooth_window_size);
 
-  ImageBasedClusterer<LinearImageLabeler<>> clusterer(
-      angle_tollerance, min_cluster_size, max_cluster_size);
+  ImageBasedClusterer<LinearImageLabeler<>> clusterer(angle_tollerance, min_cluster_size, max_cluster_size);
   clusterer.SetDiffType(DiffFactory::DiffType::ANGLES);
 
   subscriber.AddClient(&depth_ground_remover);
   depth_ground_remover.AddClient(&clusterer);
 //  subscriber.AddClient(&original_saver);
   clusterer.AddClient(&cloud_saver);
+    clusterer.AddClient(visualizer.object_clouds_client());
+    subscriber.AddClient(&visualizer);
 
   fprintf(stderr, "Running with angle tollerance: %f degrees\n",
           angle_tollerance.ToDegrees());
 
   subscriber.StartListeningToRos();
-  ros::spin();
-  return 0;
+//  ros::spin();
+//  return 0;
+    ros::AsyncSpinner spinner(1);
+    spinner.start();
+
+    auto exit_code = application.exec();
+
+    // if we close application, still wait for ros to shutdown
+    ros::waitForShutdown();
+    return exit_code;
 }

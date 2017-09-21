@@ -100,16 +100,14 @@ class ImageBasedClusterer : public AbstractClusterer {
                            cloud.projection_ptr()->params(), _angle_tollerance);
     image_labeler.ComputeLabels(_diff_type);
     const cv::Mat* labels_ptr = image_labeler.GetLabelImage();
-    fprintf(stderr, "INFO: image based labeling took: %lu us\n",
-            timer.measure());
+//    fprintf(stderr, "INFO: image based labeling took: %lu us\n",timer.measure());
 
     // send image to whoever wants to get it
     if (_label_client) {
       _label_client->OnNewObjectReceived(*labels_ptr, this->id());
     }
 
-    fprintf(stderr, "INFO: labels image sent to clients in: %lu us\n",
-            timer.measure());
+//    fprintf(stderr, "INFO: labels image sent to clients in: %lu us\n",timer.measure());
 
     // create 3d clusters from image labels
     std::unordered_map<uint16_t, Cloud> clusters;
@@ -145,10 +143,10 @@ class ImageBasedClusterer : public AbstractClusterer {
       clusters.erase(label);
     }
 
-    fprintf(stderr, "INFO: prepared clusters in: %lu us\n", timer.measure());
+//    fprintf(stderr, "INFO: prepared clusters in: %lu us\n", timer.measure());
 
     this->ShareDataWithAllClients(clusters);
-    fprintf(stderr, "INFO: clusters shared: %lu us\n", timer.measure());
+//    fprintf(stderr, "INFO: clusters shared: %lu us\n", timer.measure());
   }
 
  private:

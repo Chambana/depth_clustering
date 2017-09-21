@@ -19,8 +19,11 @@ if (${PCL_FOUND})
                         projections
                         ground_remove
                         cloud_saver
+                        visualization
+                        ${MY_QT_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${catkin_LIBRARIES}
                         ${OpenCV_LIBS}
-                        ${PCL_LIBRARIES})
+                        ${PCL_LIBRARIES}
+                        ${CMAKE_THREAD_LIBS_INIT})
 endif()
