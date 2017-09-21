@@ -76,14 +76,18 @@ int main(int argc, char* argv[]) {
 
   CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, topic_clouds);
 
-  int min_cluster_size = 20;
-  int max_cluster_size = 100000;
+//  int min_cluster_size = 20;
+//  int max_cluster_size = 100000;
+    int min_cluster_size = 100;
+    int max_cluster_size = 5000;
 
   int smooth_window_size = 5;
   Radians ground_remove_angle = 5_deg;
 
-  VectorCloudSaver cloud_saver("clusters", 10);
-  CloudSaver original_saver("original_cloud");
+//  VectorCloudSaver cloud_saver("clusters", 10);
+    VectorCloudSaver cloud_saver("clusters", 1);
+
+//  CloudSaver original_saver("original_cloud");
 
   auto depth_ground_remover = DepthGroundRemover(
       *proj_params_ptr, ground_remove_angle, smooth_window_size);
@@ -94,7 +98,7 @@ int main(int argc, char* argv[]) {
 
   subscriber.AddClient(&depth_ground_remover);
   depth_ground_remover.AddClient(&clusterer);
-  subscriber.AddClient(&original_saver);
+//  subscriber.AddClient(&original_saver);
   clusterer.AddClient(&cloud_saver);
 
   fprintf(stderr, "Running with angle tollerance: %f degrees\n",

@@ -19,26 +19,57 @@
 
 namespace depth_clustering {
 
-void VectorCloudSaver::OnNewObjectReceived(
-    const std::unordered_map<uint16_t, Cloud>& clouds, const int id) {
-  if (_folder_counter++ % _save_every > 0) {
-    // nope, skip this one
-    return;
-  }
-  auto folder_name = _prefix + "_" + WithLeadingZerosStr(_folder_counter - 1);
-  boost::filesystem::path dir(folder_name);
-  fprintf(stderr, "INFO: saving clusters to '%s'\n", folder_name.c_str());
+//void VectorCloudSaver::OnNewObjectReceived(
+//    const std::unordered_map<uint16_t, Cloud>& clouds, const int id) {
+//  if (_folder_counter++ % _save_every > 0) {
+//    // nope, skip this one
+//    return;
+//  }
+//  auto folder_name = _prefix + "_" + WithLeadingZerosStr(_folder_counter - 1);
+//  boost::filesystem::path dir(folder_name);
+//  fprintf(stderr, "INFO: saving clusters to '%s'\n", folder_name.c_str());
+//
+//  if (boost::filesystem::create_directory(dir)) {
+//    size_t cloud_counter = 0;
+//    for (const auto& kv : clouds) {
+//      const auto& cloud = kv.second;
+//      auto cloud_name = dir.string() + "/cloud_" +
+//                        WithLeadingZerosStr(cloud_counter++) + ".pcd";
+//      pcl::io::savePCDFileBinary(cloud_name, *(cloud.ToPcl()));
+//    }
+//  }
+//}
 
-  if (boost::filesystem::create_directory(dir)) {
-    size_t cloud_counter = 0;
-    for (const auto& kv : clouds) {
-      const auto& cloud = kv.second;
-      auto cloud_name = dir.string() + "/cloud_" +
-                        WithLeadingZerosStr(cloud_counter++) + ".pcd";
-      pcl::io::savePCDFileBinary(cloud_name, *(cloud.ToPcl()));
+    void VectorCloudSaver::OnNewObjectReceived(
+            const std::unordered_map<uint16_t, Cloud>& clouds, const int id) {
+      if (_folder_counter++ % _save_every > 0) {
+        // nope, skip this one
+        return;
+      }
+//      auto folder_name = _prefix + "_" + WithLeadingZerosStr(_folder_counter - 1);
+//      boost::filesystem::path dir(folder_name);
+//      fprintf(stderr, "INFO: saving clusters to '%s'\n", folder_name.c_str());
+//
+//      if (boost::filesystem::create_directory(dir)) {
+
+        const std::string& segment_dir = "segment_files";
+
+        boost::filesystem::create_directory(segment_dir);
+
+        static size_t cloud_counter = 0;
+        fprintf(stderr, "INFO: saving clusters, %i\n", cloud_counter);
+
+        for (const auto& kv : clouds) {
+          const auto& cloud = kv.second;
+//          auto cloud_name = dir.string() + "/cloud_" +
+//                            WithLeadingZerosStr(cloud_counter++) + ".pcd";
+//          auto cloud_name = "./cloud_" + WithLeadingZerosStr(cloud_counter++) + ".pcd";
+            auto cloud_name = segment_dir + "/cloud_" + WithLeadingZerosStr(cloud_counter++) + ".pcd";
+
+            pcl::io::savePCDFileBinary(cloud_name, *(cloud.ToPcl()));
+        }
+//      }
     }
-  }
-}
 
 std::string VectorCloudSaver::WithLeadingZerosStr(int num) {
   size_t leading_zeros_num = 6;
@@ -55,7 +86,7 @@ void DepthMapSaver::OnNewObjectReceived(
   }
   auto folder_name = _prefix + "_" + WithLeadingZerosStr(_folder_counter - 1);
   boost::filesystem::path dir(folder_name);
-  fprintf(stderr, "INFO: saving clusters to '%s'\n", folder_name.c_str());
+  fprintf(stderr, "DEPTH MAP INFO: saving clusters to '%s'\n", folder_name.c_str());
 
   if (boost::filesystem::create_directory(dir)) {
     size_t cloud_counter = 0;

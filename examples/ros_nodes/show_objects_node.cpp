@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
   Visualizer visualizer;
   visualizer.show();
 
-  int min_cluster_size = 20;
+  int min_cluster_size = 20;   //This is the number of POINTS in a segment
   int max_cluster_size = 100000;
 
   int smooth_window_size = 7;
